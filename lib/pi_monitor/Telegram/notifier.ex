@@ -37,7 +37,7 @@ defmodule PiMonitor.Telegram.Notifier do
   def handle_cast({:process_message, "/temp"}, state) do
     case File.read("/sys/class/thermal/thermal_zone0/temp") do
       {:ok, content} ->
-        temp = :erlang.binary_to_integer(content)
+        temp = :erlang.binary_to_integer(String.trim(content))
         PiMonitor.Telegram.Api.send_message("#{temp / 1000}°C")
 
       {:error, _} ->
