@@ -47,6 +47,19 @@ defmodule PiMonitor.Telegram.Notifier do
     {:noreply, state}
   end
 
+  def handle_cast({:process_message, "/ip"}, state) do
+    case HTTPoison.get("https://ip4.me/api/") do
+      {:ok, %{body: body}} ->
+        fields = String.split(body, ",")
+        PiMonitor.Telegram.Api.send_message(hd(tl(fields)))
+
+      _ ->
+        PiMonitor.Telegram.Api.send_message("Failed to get IP address.")
+    end
+
+    {:noreply, state}
+  end
+
   def handle_cast({:process_message, _}, state) do
     PiMonitor.Telegram.Api.send_message("Whatcha talkin' 'bout, Willis?")
     {:noreply, state}
