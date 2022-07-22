@@ -78,7 +78,10 @@ defmodule PiMonitor.Telegram.Notifier do
     if since > @max_gap or (failure_rate > @threshold and since > @min_gap) do
       message_text = "Received: #{received}, Failed: #{failed}, Failure rate: #{failure_rate}%"
 
-      {:ok, _} = PiMonitor.Telegram.Api.send_message(message_text)
+      case PiMonitor.Telegram.Api.send_message(message_text) do
+        {:ok, _} ->  {:noreply, {tref, now}}
+        _ -> {:noreply, state}
+      end
 
       {:noreply, {tref, now}}
     else
