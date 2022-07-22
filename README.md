@@ -1,21 +1,16 @@
 # Pi Monitor
 
-**TODO: Add description**
+Monitors internet connection and Raspberry Pi runtime data and provides an interface with Telegram.
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `pi_monitor` to your list of dependencies in `mix.exs`:
+1. Create a bot with Telegram's BotFather.
+2. Start a conversation with the bot.
+3. Get the chat_id of that conversation.
+4. Replace the values in `config.rename_me.exs` and rename it to config.secret.exs.
 
-```elixir
-def deps do
-  [
-    {:pi_monitor, "~> 0.1.0"}
-  ]
-end
-```
+## Commands
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at <https://hexdocs.pm/pi_monitor>.
-
+* `/ping` Gets the current ping states of the last 60 minutes
+* `/ip` Returns the external IP address as reported by https://ip4.me/api/.
+* `/temp` returns the current temperature from /sys/class/thermal/thermal_zone0/temp
