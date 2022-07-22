@@ -53,9 +53,7 @@ defmodule PiMonitor.Telegram.Updater do
     {:noreply, state}
   end
 
-  def handle_info({:DOWN, _, _, _, reason}, %{offset: offset} = state) do
-    Logger.warn("getUpdates failed with #{inspect(reason)}")
-
+  def handle_info({:DOWN, _ref, _, _, _reason}, %{offset: offset} = state) do
     Task.Supervisor.async_nolink(PiMonitor.Task.Supervisor, fn ->
       PiMonitor.Telegram.Api.get_updates(offset, @timeout)
     end)
