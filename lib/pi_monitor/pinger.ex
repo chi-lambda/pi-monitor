@@ -11,7 +11,8 @@ defmodule PiMonitor.Pinger do
     Logger.configure(level: :all)
     {:ok, _tref} = :timer.send_interval(1000, :ping)
     Logger.info("#{__MODULE__} initialized")
-    {:ok, []}
+    host = Application.get_env(:pi_monitor, :monitor_host)
+    {:ok, %{host: host}}
   end
 
   @impl true
@@ -32,13 +33,13 @@ defmodule PiMonitor.Pinger do
   end
 
   @impl true
-  def handle_info(:ping, state) do
+  def handle_info(:ping, %{host: host} = state) do
     id = PiMonitor.Storage.add(:erlang.system_time())
 
     Task.start(fn ->
       port =
         :erlang.open_port({:spawn_executable, "/bin/ping"}, [
-          {:args, ["-c1", "-W 600", "8.8.8.8"]},
+          {:args, ["-c1", "-W 600", host]},
           :exit_status
         ])
 
