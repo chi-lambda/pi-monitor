@@ -8,10 +8,9 @@ defmodule PiMonitor.Application do
   @impl true
   def start(_type, _args) do
     children = [
-      # Starts a worker by calling: PiMonitor.Worker.start_link(arg)
       {Task.Supervisor, name: PiMonitor.Task.Supervisor},
       {PiMonitor.Storage, name: PiMonitor.Storage},
-      {PiMonitor.Worker, name: PiMonitor.Worker},
+      {PiMonitor.Pinger, name: PiMonitor.Pinger},
       {PiMonitor.Telegram.Notifier, name: PiMonitor.Telegram.Notifier},
       {PiMonitor.Telegram.Updater, name: PiMonitor.Telegram.Updater}
     ]

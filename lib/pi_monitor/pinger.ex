@@ -1,4 +1,4 @@
-defmodule PiMonitor.Worker do
+defmodule PiMonitor.Pinger do
   use GenServer
   require Logger
 
