@@ -7,7 +7,7 @@ Monitors internet connection and Raspberry Pi runtime data and provides an inter
 1. Create a bot with Telegram's BotFather.
 2. Start a conversation with the bot.
 3. Get the chat_id of that conversation.
-4. Replace the values in `config.rename_me.exs` and rename it to config.secret.exs.
+4. Replace the values in `config.exs.example` and rename it to `config.secret.exs`.
 
 ## Commands
 
