@@ -16,29 +16,34 @@ defmodule PiMonitor.Telegram.Updater do
   @impl true
   def handle_info({ref, {:ok, %{body: body}}}, %{offset: offset} = state) do
     Process.demonitor(ref, [:flush])
-    %{"result" => result} = Jason.decode!(body)
 
-    if Enum.count(result) > 0 do
-      messages =
-        Enum.filter(result, fn msg -> Map.has_key?(msg, "message") end)
-        |> Enum.map(fn msg -> msg["message"]["text"] end)
+    case Jason.decode!(body) do
+      %{"result" => result} ->
+        if Enum.count(result) > 0 do
+          messages =
+            Enum.filter(result, fn msg -> Map.has_key?(msg, "message") end)
+            |> Enum.map(fn msg -> msg["message"]["text"] end)
 
-      update_ids = Enum.map(result, fn msg -> msg["update_id"] end)
-      new_offset = Enum.max(update_ids) + 1
-      :lists.foreach(fn msg -> PiMonitor.Telegram.Notifier.process_message(msg) end, messages)
+          update_ids = Enum.map(result, fn msg -> msg["update_id"] end)
+          new_offset = Enum.max(update_ids) + 1
+          :lists.foreach(fn msg -> PiMonitor.Telegram.Notifier.process_message(msg) end, messages)
 
-      Task.Supervisor.async_nolink(PiMonitor.Task.Supervisor, fn ->
-        PiMonitor.Telegram.Api.get_updates(new_offset, @timeout)
-      end)
+          Task.Supervisor.async_nolink(PiMonitor.Task.Supervisor, fn ->
+            PiMonitor.Telegram.Api.get_updates(new_offset, @timeout)
+          end)
 
-      Logger.info("Got #{Enum.count(result)} new messages: '#{Enum.join(messages, "','")}'.")
-      {:noreply, %{state | offset: new_offset}}
-    else
-      Task.Supervisor.async_nolink(PiMonitor.Task.Supervisor, fn ->
-        PiMonitor.Telegram.Api.get_updates(offset, @timeout)
-      end)
+          Logger.info("Got #{Enum.count(result)} new messages: '#{Enum.join(messages, "','")}'.")
+          {:noreply, %{state | offset: new_offset}}
+        else
+          Task.Supervisor.async_nolink(PiMonitor.Task.Supervisor, fn ->
+            PiMonitor.Telegram.Api.get_updates(offset, @timeout)
+          end)
 
-      {:noreply, state}
+          {:noreply, state}
+        end
+
+      %{"ok" => false, "description" => description, "error_code" => error_code} ->
+        Logger.warn("Error calling getUpdates: #{error_code} #{description}")
     end
   end
 
