@@ -17,7 +17,7 @@ defmodule PiMonitor.Application do
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
-    opts = [strategy: :one_for_one, name: PiMonitor.Supervisor]
+    opts = [strategy: :one_for_one, name: PiMonitor.Supervisor, max_restarts: 100]
     Supervisor.start_link(children, opts)
   end
 end
