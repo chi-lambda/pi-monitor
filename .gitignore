@@ -26,3 +26,5 @@ pi_monitor-*.tar
 /tmp/
 
 /config/*secret*
+
+/Mnesia*
