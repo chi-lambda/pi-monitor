@@ -44,6 +44,7 @@ defmodule PiMonitor.Telegram.Updater do
 
       %{"ok" => false, "description" => description, "error_code" => error_code} ->
         Logger.warn("Error calling getUpdates: #{error_code} #{description}")
+        {:noreply, state}
     end
   end
 
