@@ -79,7 +79,7 @@ defmodule PiMonitor.Telegram.Notifier do
       message_text = "Received: #{received}, Failed: #{failed}, Failure rate: #{failure_rate}%"
 
       case PiMonitor.Telegram.Api.send_message(message_text) do
-        {:ok, _} ->  {:noreply, {tref, now}}
+        {:ok, _} -> {:noreply, {tref, now}}
         _ -> {:noreply, state}
       end
 
