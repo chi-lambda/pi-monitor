@@ -131,7 +131,7 @@ defmodule PiMonitor.Storage do
       {:aborted, {:already_exists, :ping_storage}} -> :ok
     end
 
-    :mnesia.wait_for_tables([:ping_storage], 10000)
+    :mnesia.wait_for_tables([:ping_storage], :infinity)
   end
 
   defp last() do
