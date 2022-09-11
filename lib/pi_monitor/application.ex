@@ -9,7 +9,7 @@ defmodule PiMonitor.Application do
   def start(_type, _args) do
     children = [
       {Task.Supervisor, name: PiMonitor.Task.Supervisor},
-      {PiMonitor.Storage, name: PiMonitor.Storage},
+      {PiMonitor.Storage, name: PiMonitor.Storage, timeout: :infinity},
       {PiMonitor.Pinger, name: PiMonitor.Pinger},
       {PiMonitor.Telegram.Notifier, name: PiMonitor.Telegram.Notifier},
       {PiMonitor.Telegram.Updater, name: PiMonitor.Telegram.Updater}
