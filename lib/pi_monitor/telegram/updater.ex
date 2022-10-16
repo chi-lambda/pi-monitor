@@ -44,6 +44,12 @@ defmodule PiMonitor.Telegram.Updater do
 
       %{"ok" => false, "description" => description, "error_code" => error_code} ->
         Logger.warn("Error calling getUpdates: #{error_code} #{description}")
+
+        Task.Supervisor.async_nolink(PiMonitor.Task.Supervisor, fn ->
+          :timer.sleep(60_000)
+          PiMonitor.Telegram.Api.get_updates(offset, @timeout)
+        end)
+
         {:noreply, state}
     end
   end
