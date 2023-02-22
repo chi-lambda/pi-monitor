@@ -28,7 +28,7 @@ defmodule PiMonitor.Storage do
           )
       end)
 
-    cleanup(counter, 86400)
+    # cleanup(counter, 86400)
     {:reply, counter, %{state | counter: counter + 1}}
   end
 
@@ -53,12 +53,9 @@ defmodule PiMonitor.Storage do
   @impl true
   def handle_call({:get, age}, _from, %{counter: counter} = state) do
     # fn {c, _, end_time} when c >= counter - age -> end_time end
-    {:atomic, result} =
-      :mnesia.transaction(fn ->
-        :mnesia.select(:ping_storage, [
-          {{:ping_storage, :"$1", :_, :"$2"}, [{:>=, :"$1", counter - age}], [:"$2"]}
+    result = :mnesia.dirty_select(:ping_storage, [
+          {{:ping_storage, :"$1", :_, :"$2"}, [{:>=, :"$1", counter - age - 1}], [:"$2"]}
         ])
-      end)
 
     {:reply, result, state}
   end
@@ -97,6 +94,23 @@ defmodule PiMonitor.Storage do
     List.foldl(stats, %{pending: 0, failed: 0, received: 0}, fn status, m ->
       Map.update!(m, simplify(status), fn x -> x + 1 end)
     end)
+  end
+
+  def dump_to_textfile(filename, age) do
+    last = :mnesia.dirty_last(:ping_storage)
+    first = last - age
+    {:ok, file} = File.open(filename, [:write])
+    spawn(fn -> dump_to_textfile_loop(file, first) end)
+  end
+
+  defp dump_to_textfile_loop(file, i) do
+    if i <= :mnesia.dirty_last(:ping_storage) do
+      rec = :mnesia.dirty_read(:ping_storage, i)
+      IO.write(file, :io_lib.format('~p~n', [rec]))
+      dump_to_textfile_loop(file, i + 1)
+    else
+      :ok = File.close(file)
+    end
   end
 
   defp simplify(:pending) do
