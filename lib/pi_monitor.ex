@@ -29,5 +29,4 @@ defmodule PiMonitor do
     {:ok, tref} = :timer.apply_interval(5000, __MODULE__, :print_pretty_stats, [])
     tref
   end
-
 end

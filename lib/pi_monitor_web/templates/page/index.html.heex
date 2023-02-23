@@ -1,41 +1,50 @@
-<section class="phx-hero">
-  <h1><%= gettext "Welcome to %{name}!", name: "Phoenix" %></h1>
-  <p>Peace of mind from prototype to production</p>
-</section>
 
-<section class="row">
-  <article class="column">
-    <h2>Resources</h2>
-    <ul>
-      <li>
-        <a href="https://hexdocs.pm/phoenix/overview.html">Guides &amp; Docs</a>
-      </li>
-      <li>
-        <a href="https://github.com/phoenixframework/phoenix">Source</a>
-      </li>
-      <li>
-        <a href="https://github.com/phoenixframework/phoenix/blob/v1.6/CHANGELOG.md">v1.6 Changelog</a>
-      </li>
-    </ul>
-  </article>
-  <article class="column">
-    <h2>Help</h2>
-    <ul>
-      <li>
-        <a href="https://elixirforum.com/c/phoenix-forum">Forum</a>
-      </li>
-      <li>
-        <a href="https://web.libera.chat/#elixir">#elixir on Libera Chat (IRC)</a>
-      </li>
-      <li>
-        <a href="https://twitter.com/elixirphoenix">Twitter @elixirphoenix</a>
-      </li>
-      <li>
-        <a href="https://elixir-slackin.herokuapp.com/">Elixir on Slack</a>
-      </li>
-      <li>
-        <a href="https://discord.gg/elixir">Elixir on Discord</a>
-      </li>
-    </ul>
-  </article>
-</section>
+<div id="app">
+  <canvas id="myChart" style="width: 2000px; height: 1500px"></canvas>
+</div>
+
+<div id="app2"></div>
+
+<script>
+  const ctx = document.getElementById('myChart');
+
+  var chart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: [],
+      datasets: [{
+        label: 'Ping in seconds',
+        data: [],
+        barThickness: 1
+      }]
+    },
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+
+  const xhttp = new XMLHttpRequest();
+  xhttp.onload = function() {
+    console.log(this.responseText);
+    let data = JSON.parse(this.responseText); //.filter(x => (x.end_time - x.start_time) / 100000000 > 1);
+    let labels = data.map(x => new Date(x.start_time/1000000).toLocaleString("se-SE"));
+    let times = data.map(x => (x.end_time - x.start_time) / 100000000)
+    chart.data.labels = labels;
+    chart.data.datasets[0].data = times;
+    chart.update();
+  }
+  xhttp.open("GET", "/pings?last=10000", true);
+  xhttp.send();
+
+  var vue = Vue.createApp({
+    data() {
+      return {
+        chart: chart
+      }
+    }
+  }).mount('#app2')
+</script>

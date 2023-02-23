@@ -52,10 +52,11 @@ defmodule PiMonitor.Storage do
 
   @impl true
   def handle_call({:get, age}, _from, %{counter: counter} = state) do
-    # fn {c, _, end_time} when c >= counter - age -> end_time end
-    result = :mnesia.dirty_select(:ping_storage, [
-          {{:ping_storage, :"$1", :_, :"$2"}, [{:>=, :"$1", counter - age - 1}], [:"$2"]}
-        ])
+    # fn {c, _, end_time} when c >= counter - age -> {start_time, end_time} end
+    result =
+      :mnesia.dirty_select(:ping_storage, [
+        {{:ping_storage, :"$1", :"$2", :"$3"}, [{:>=, :"$1", counter - age - 1}], [{{:'$2',:'$3'}}]}
+      ])
 
     {:reply, result, state}
   end
@@ -88,10 +89,18 @@ defmodule PiMonitor.Storage do
     GenServer.call(server, {:get, age})
   end
 
+  def get_as_json(server, age) do
+    pings = get(server, age)
+
+    Enum.map(pings, fn {start_time, end_time} ->
+      %{start_time: start_time, end_time: end_time}
+    end)
+  end
+
   def get_grouped(server, age) do
     stats = get(server, age)
 
-    List.foldl(stats, %{pending: 0, failed: 0, received: 0}, fn status, m ->
+    List.foldl(stats, %{pending: 0, failed: 0, received: 0}, fn {_, status}, m ->
       Map.update!(m, simplify(status), fn x -> x + 1 end)
     end)
   end
