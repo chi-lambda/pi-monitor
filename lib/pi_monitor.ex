@@ -1,5 +1,14 @@
 defmodule PiMonitor do
+  @moduledoc """
+  PiMonitor keeps the contexts that define your domain
+  and business logic.
+
+  Contexts are also responsible for managing your data, regardless
+  if it comes from the database, an external API or others.
+  """
+
   require Logger
+
   @spec get_pretty_stats :: binary()
   def get_pretty_stats() do
     %{pending: pending, received: received, failed: failed} =
@@ -20,4 +29,5 @@ defmodule PiMonitor do
     {:ok, tref} = :timer.apply_interval(5000, __MODULE__, :print_pretty_stats, [])
     tref
   end
+
 end

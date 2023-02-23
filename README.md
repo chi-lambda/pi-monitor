@@ -1,16 +1,19 @@
-# Pi Monitor
+# PiMonitor
 
-Monitors internet connection and Raspberry Pi runtime data and provides an interface with Telegram.
+To start your Phoenix server:
 
-## Installation
+  * Install dependencies with `mix deps.get`
+  * Create and migrate your database with `mix ecto.setup`
+  * Start Phoenix endpoint with `mix phx.server` or inside IEx with `iex -S mix phx.server`
 
-1. Create a bot with Telegram's BotFather.
-2. Start a conversation with the bot.
-3. Get the chat_id of that conversation.
-4. Replace the values in `config.exs.example` and rename it to `config.secret.exs`.
+Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
 
-## Commands
+Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
 
-* `/ping` Gets the current ping states of the last 60 minutes
-* `/ip` Returns the external IP address as reported by https://ip4.me/api/.
-* `/temp` returns the current temperature from /sys/class/thermal/thermal_zone0/temp
+## Learn more
+
+  * Official website: https://www.phoenixframework.org/
+  * Guides: https://hexdocs.pm/phoenix/overview.html
+  * Docs: https://hexdocs.pm/phoenix
+  * Forum: https://elixirforum.com/c/phoenix-forum
+  * Source: https://github.com/phoenixframework/phoenix
