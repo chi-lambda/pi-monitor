@@ -22,6 +22,12 @@
       scales: {
         y: {
           beginAtZero: true
+        },
+        x: {
+          ticks: {
+            maxRotation: 90,
+            minRotation: 90
+          }
         }
       }
     }
@@ -30,14 +36,14 @@
   const xhttp = new XMLHttpRequest();
   xhttp.onload = function() {
     console.log(this.responseText);
-    let data = JSON.parse(this.responseText); //.filter(x => (x.end_time - x.start_time) / 100000000 > 1);
-    let labels = data.map(x => new Date(x.start_time/1000000).toLocaleString("se-SE"));
+    let data = JSON.parse(this.responseText);
+    let labels = data.map(x => new Date(x.start_time / 1000000).toLocaleString("se-SE"));
     let times = data.map(x => (x.end_time - x.start_time) / 100000000)
     chart.data.labels = labels;
     chart.data.datasets[0].data = times;
     chart.update();
   }
-  xhttp.open("GET", "/pings?last=10000", true);
+  xhttp.open("GET", "/pings?last=30000", true);
   xhttp.send();
 
   var vue = Vue.createApp({
