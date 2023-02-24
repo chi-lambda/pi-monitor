@@ -11,8 +11,8 @@ defmodule PiMonitor.Application do
       {Task.Supervisor, name: PiMonitor.Task.Supervisor},
       {PiMonitor.Storage, name: PiMonitor.Storage, timeout: :infinity},
       {PiMonitor.Pinger, name: PiMonitor.Pinger},
-      # {PiMonitor.Telegram.Notifier, name: PiMonitor.Telegram.Notifier},
-      # {PiMonitor.Telegram.Updater, name: PiMonitor.Telegram.Updater},
+      {PiMonitor.Telegram.Notifier, name: PiMonitor.Telegram.Notifier},
+      {PiMonitor.Telegram.Updater, name: PiMonitor.Telegram.Updater},
       # Start the PubSub system
       {Phoenix.PubSub, name: PiMonitor.PubSub},
       # Start the Endpoint (http/https)
