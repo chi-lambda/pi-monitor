@@ -96,7 +96,7 @@ defmodule PiMonitor.Storage do
 
   def get_by_timestamp(from, to) do
     pings = :mnesia.dirty_select(:ping_storage, [
-      {{:ping_storage, :_, :"$1", :"$2"}, [{:andalso, {:>=, :"$1", from}, {:<, :"$2", to}}],
+      {{:ping_storage, :_, :"$1", :"$2"}, [{:andalso, {:>=, :"$1", from}, {:<, :"$1", to}}],
        [{{:"$1", :"$2"}}]}
     ])
     Enum.map(medianize(pings, 10), fn {start_time, duration} ->
