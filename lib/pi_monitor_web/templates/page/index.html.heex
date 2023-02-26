@@ -1,14 +1,18 @@
 
-<div id="app">
-  <canvas id="myChart" style="width: 2000px; height: 1500px"></canvas>
+<div style="height: 700px; width: 100%">
+  <canvas id="myChart"></canvas>
 </div>
 
-<div id="app2"></div>
+<div id="app2">
+  <a class="w3-button w3-green" @click="back" v-if="canNavigate">Back</a>
+  <a class="w3-button w3-red" v-if="day &lt; 0 && canNavigate" @click="forward">Forward</a>
+</div>
 
 <script>
   const ctx = document.getElementById('myChart');
 
   var chart = new Chart(ctx, {
+
     type: 'bar',
     data: {
       labels: [],
@@ -19,6 +23,7 @@
       }]
     },
     options: {
+      maintainAspectRatio: false,
       scales: {
         y: {
           beginAtZero: true
@@ -40,24 +45,57 @@
     }
   });
 
-  const today = ((new Date().valueOf() / 86400000)|0) * 86400000;
-  const xhttp = new XMLHttpRequest();
-  xhttp.onload = function() {
-    let data = JSON.parse(this.responseText);
-    let labels = data.map(x => x.start_time / 1000000)
-    let times = data.map(x => x.duration / 1000000000)
-    chart.data.labels = labels;
-    chart.data.datasets[0].data = times;
-    chart.update();
-  }
-  xhttp.open("GET", "/pings?timestamp=" + today, true);
-  xhttp.send();
+  const day_length = 86400000;
+  const today = ((new Date().valueOf() / day_length)|0) * day_length;
 
   var vue = Vue.createApp({
     data() {
       return {
-        chart: chart
+        day: 0,
+        canNavigate: false
       }
+    },
+    methods: {
+      back() {
+        this.canNavigate = false;
+        this.day = this.day - day_length;
+        this.reload();
+      },
+      forward() {
+        this.canNavigate = false;
+        this.day = this.day + day_length;
+        this.reload();
+      },
+      reload() {
+        const xhttp = new XMLHttpRequest();
+        let v = this;
+        xhttp.onload = function() {
+          let data = JSON.parse(this.responseText);
+          let labels = data.map(x => x.start_time / 1000000)
+          let times = data.map(x => x.duration / 1000000000)
+          chart.data.labels = labels;
+          chart.data.datasets[0].data = times;
+          chart.update();
+          v.canNavigate = true;
+        }
+        xhttp.open("GET", "/pings?timestamp=" + (today + this.day), true);
+        xhttp.send();
+      }
+    },
+    mounted() {
+      const xhttp = new XMLHttpRequest();
+      let v = this;
+      xhttp.onload = function() {
+        let data = JSON.parse(this.responseText);
+        let labels = data.map(x => x.start_time / 1000000)
+        let times = data.map(x => x.duration / 1000000000)
+        chart.data.labels = labels;
+        chart.data.datasets[0].data = times;
+        chart.update();
+        v.canNavigate = true;
+      }
+      xhttp.open("GET", "/pings?timestamp=" + today, true);
+      xhttp.send();
     }
   }).mount('#app2')
 </script>
