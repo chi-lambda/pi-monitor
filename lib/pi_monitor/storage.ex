@@ -20,12 +20,14 @@ defmodule PiMonitor.Storage do
 
   @impl true
   def handle_call({:add, start_time}, _from, %{counter: counter} = state) do
-    {:atomic, :ok} =
-      :mnesia.transaction(fn ->
-        :ok =
-          :mnesia.write(
-            ping_storage(counter: counter, start_time: start_time, end_time: :pending)
-          )
+    Task.start(fn ->
+      {:atomic, :ok} =
+        :mnesia.transaction(fn ->
+          :ok =
+            :mnesia.write(
+              ping_storage(counter: counter, start_time: start_time, end_time: :pending)
+            )
+        end)
       end)
 
     # cleanup(counter, 86400)
@@ -85,20 +87,40 @@ defmodule PiMonitor.Storage do
     GenServer.call(__MODULE__, {:update, id, end_time})
   end
 
-  def get(server, age) do
-    GenServer.call(server, {:get, age})
+  def get(age) do
+    last = :mnesia.dirty_last(:ping_storage)
+    :mnesia.dirty_select(:ping_storage, [
+      {{:ping_storage, :"$1", :"$2", :"$3"}, [{:>=, :"$1", last - age}], [{{:'$2',:'$3'}}]}
+    ])
   end
 
-  def get_as_json(server, age) do
-    pings = get(server, age)
+  def get_as_json(age, stride) do
+    pings = get(age)
 
-    Enum.map(pings, fn {start_time, end_time} ->
+    Enum.map(every_nth(pings, max(1, stride)), fn {start_time, end_time} ->
       %{start_time: start_time, end_time: end_time}
     end)
   end
 
-  def get_grouped(server, age) do
-    stats = get(server, age)
+  defp every_nth(list, stride) do
+    every_nth(list, stride, 0, [])
+  end
+
+  defp every_nth([], _stride, _, result) do
+    Enum.reverse(result)
+  end
+
+  defp every_nth([x|list], stride, 0, result) do
+    every_nth(list, stride, 1, [x|result])
+  end
+
+  defp every_nth([x|list], stride, n, result) do
+    every_nth(list, stride, rem(n + 1, stride), [x|result])
+  end
+
+
+  def get_grouped(age) do
+    stats = get(age)
 
     List.foldl(stats, %{pending: 0, failed: 0, received: 0}, fn {_, status}, m ->
       Map.update!(m, simplify(status), fn x -> x + 1 end)

@@ -27,7 +27,8 @@
           ticks: {
             maxRotation: 90,
             minRotation: 90
-          }
+          },
+          type: 'timeseries'
         }
       }
     }
@@ -35,15 +36,14 @@
 
   const xhttp = new XMLHttpRequest();
   xhttp.onload = function() {
-    console.log(this.responseText);
     let data = JSON.parse(this.responseText);
-    let labels = data.map(x => new Date(x.start_time / 1000000).toLocaleString("se-SE"));
-    let times = data.map(x => (x.end_time - x.start_time) / 100000000)
+    let labels = data.map(x => x.start_time / 1000000)
+    let times = data.map(x => (x.end_time - x.start_time) / 1000000000)
     chart.data.labels = labels;
     chart.data.datasets[0].data = times;
     chart.update();
   }
-  xhttp.open("GET", "/pings?last=30000", true);
+  xhttp.open("GET", "/pings?last=10000&stride=5", true);
   xhttp.send();
 
   var vue = Vue.createApp({

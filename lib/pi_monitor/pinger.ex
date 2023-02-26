@@ -21,13 +21,13 @@ defmodule PiMonitor.Pinger do
   end
 
   @impl true
-  def handle_cast({:exit_status, id, 0, end_time}, state) do
+  def handle_cast({:exit_status, id, 0 = _exit_code, end_time}, state) do
     PiMonitor.Storage.update(id, end_time)
     {:noreply, state}
   end
 
   @impl true
-  def handle_cast({:exit_status, id, _, _}, state) do
+  def handle_cast({:exit_status, id, _exit_code, _end_time}, state) do
     PiMonitor.Storage.update(id, :failed)
     {:noreply, state}
   end

@@ -12,7 +12,7 @@ defmodule PiMonitor do
   @spec get_pretty_stats :: binary()
   def get_pretty_stats() do
     %{pending: pending, received: received, failed: failed} =
-      PiMonitor.Storage.get_grouped(PiMonitor.Storage, 3600)
+      PiMonitor.Storage.get_grouped(3600)
 
     "Pending: #{pending}, Received: #{received}, Failed: #{failed}, Failure rate: #{failed / max(received + failed, 1) * 100}%"
   end

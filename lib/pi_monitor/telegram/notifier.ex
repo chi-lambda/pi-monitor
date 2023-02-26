@@ -22,7 +22,7 @@ defmodule PiMonitor.Telegram.Notifier do
 
   def handle_cast(:send_notification, state) do
     %{pending: _, failed: failed, received: received} =
-      PiMonitor.Storage.get_grouped(PiMonitor.Storage, 3600)
+      PiMonitor.Storage.get_grouped(3600)
 
     failure_rate = failed / max(received + failed, 1) * 100
     message_text = "Received: #{received}, Failed: #{failed}, Failure rate: #{failure_rate}%"
@@ -68,7 +68,7 @@ defmodule PiMonitor.Telegram.Notifier do
   @impl true
   def handle_info(:send_notification, {tref, last_call} = state) do
     %{pending: _, failed: failed, received: received} =
-      PiMonitor.Storage.get_grouped(PiMonitor.Storage, 3600)
+      PiMonitor.Storage.get_grouped(3600)
 
     failure_rate = failed / max(received + failed, 1) * 100
     now = :erlang.system_time(:milli_seconds)
