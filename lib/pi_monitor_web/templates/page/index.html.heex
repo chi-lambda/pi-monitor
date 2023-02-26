@@ -6,6 +6,7 @@
 <div id="app2">
   <a class="w3-button w3-green" @click="back" v-if="canNavigate">Back</a>
   <a class="w3-button w3-red" v-if="day &lt; 0 && canNavigate" @click="forward">Forward</a>
+  <div v-if="!canNavigate" class="w3-panel w3-gray"><p>Waiting for data …</p></div>
 </div>
 
 <script>
