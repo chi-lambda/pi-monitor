@@ -6,6 +6,8 @@
 <div id="app2">
   <a class="w3-button w3-green" @click="back" v-if="canNavigate">Back</a>
   <a class="w3-button w3-red" v-if="day &lt; 0 && canNavigate" @click="forward">Forward</a>
+  <input class="w3-input" type="date" style="width: 30ex" v-if="canNavigate" v-model="date"/>
+  <a class="w3-button w3-blue" @click="goToDate" v-if="canNavigate">Go to date</a>
   <div v-if="!canNavigate" class="w3-panel w3-gray"><p>Waiting for data …</p></div>
 </div>
 
@@ -53,10 +55,16 @@
     data() {
       return {
         day: 0,
-        canNavigate: false
+        canNavigate: false,
+        date: new Date().toLocaleString("se-SE").substr(0, 10)
       }
     },
     methods: {
+      goToDate() {
+        this.canNavigate = false;
+        this.day = new Date(this.date).valueOf() - today
+        this.reload();
+      },
       back() {
         this.canNavigate = false;
         this.day = this.day - day_length;
