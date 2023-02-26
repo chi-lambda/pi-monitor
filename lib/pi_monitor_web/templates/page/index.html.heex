@@ -28,22 +28,29 @@
             maxRotation: 90,
             minRotation: 90
           },
-          type: 'timeseries'
+          type: 'time',
+          time: {
+            unit: 'hour',
+            displayFormats:{
+              hour: "yyyy-MM-dd HH:mm"
+            }
+          }
         }
       }
     }
   });
 
+  const today = ((new Date().valueOf() / 86400000)|0) * 86400000;
   const xhttp = new XMLHttpRequest();
   xhttp.onload = function() {
     let data = JSON.parse(this.responseText);
     let labels = data.map(x => x.start_time / 1000000)
-    let times = data.map(x => (x.end_time - x.start_time) / 1000000000)
+    let times = data.map(x => x.duration / 1000000000)
     chart.data.labels = labels;
     chart.data.datasets[0].data = times;
     chart.update();
   }
-  xhttp.open("GET", "/pings?last=10000&stride=5", true);
+  xhttp.open("GET", "/pings?timestamp=" + today, true);
   xhttp.send();
 
   var vue = Vue.createApp({

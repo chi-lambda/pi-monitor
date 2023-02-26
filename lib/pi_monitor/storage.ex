@@ -94,30 +94,53 @@ defmodule PiMonitor.Storage do
     ])
   end
 
-  def get_as_json(age, stride) do
-    pings = get(age)
-
-    Enum.map(every_nth(pings, max(1, stride)), fn {start_time, end_time} ->
-      %{start_time: start_time, end_time: end_time}
+  def get_by_timestamp(from, to) do
+    pings = :mnesia.dirty_select(:ping_storage, [
+      {{:ping_storage, :_, :"$1", :"$2"}, [{:andalso, {:>=, :"$1", from}, {:<, :"$2", to}}],
+       [{{:"$1", :"$2"}}]}
+    ])
+    Enum.map(medianize(pings, 10), fn {start_time, duration} ->
+      %{start_time: start_time, duration: duration}
     end)
   end
 
-  defp every_nth(list, stride) do
-    every_nth(list, stride, 0, [])
+  def get_as_json_averaged(age, stride) do
+    pings = get(age)
+
+    Enum.map(average(pings, max(1, stride)), fn {start_time, duration} ->
+      %{start_time: start_time, duration: duration}
+    end)
   end
 
-  defp every_nth([], _stride, _, result) do
-    Enum.reverse(result)
+  def get_as_json_medianized(age, stride) do
+    pings = get(age)
+
+    Enum.map(medianize(pings, max(1, stride)), fn {start_time, duration} ->
+      %{start_time: start_time, duration: duration}
+    end)
   end
 
-  defp every_nth([x|list], stride, 0, result) do
-    every_nth(list, stride, 1, [x|result])
+  defp average(list, stride) do
+    chunked = Enum.chunk_every(Enum.filter(list, fn({_, end_time}) -> is_number(end_time) end), stride)
+    Enum.map(chunked, fn([{start_time, _}|_] = chunk) -> {start_time, Enum.sum(Enum.map(chunk, &calculate_duration/1)) / stride} end)
   end
 
-  defp every_nth([x|list], stride, n, result) do
-    every_nth(list, stride, rem(n + 1, stride), [x|result])
+  defp medianize(list, stride) do
+    chunked = Enum.chunk_every(Enum.filter(list, fn({_, end_time}) -> is_number(end_time) end), stride)
+    Enum.map(chunked, fn([{start_time, _}|_] = chunk) -> {start_time, Enum.at(Enum.sort(Enum.map(chunk, &calculate_duration/1)), div(stride, 2))} end)
   end
 
+  defp calculate_duration({_, :failed}) do
+    0
+  end
+
+  defp calculate_duration({_, :pending}) do
+    0
+  end
+
+  defp calculate_duration({start_time, end_time}) do
+    end_time - start_time
+  end
 
   def get_grouped(age) do
     stats = get(age)
