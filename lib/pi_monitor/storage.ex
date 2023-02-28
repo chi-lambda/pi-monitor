@@ -52,17 +52,6 @@ defmodule PiMonitor.Storage do
     {:reply, :ok, state}
   end
 
-  @impl true
-  def handle_call({:get, age}, _from, %{counter: counter} = state) do
-    # fn {c, _, end_time} when c >= counter - age -> {start_time, end_time} end
-    result =
-      :mnesia.dirty_select(:ping_storage, [
-        {{:ping_storage, :"$1", :"$2", :"$3"}, [{:>=, :"$1", counter - age - 1}], [{{:'$2',:'$3'}}]}
-      ])
-
-    {:reply, result, state}
-  end
-
   defp cleanup(counter, age) do
     :mnesia.transaction(fn ->
       # fn {c, _} when c < counter - age -> {:ping_storage, :"$1"} end
