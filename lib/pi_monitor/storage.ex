@@ -88,9 +88,14 @@ defmodule PiMonitor.Storage do
       {{:ping_storage, :_, :"$1", :"$2"}, [{:andalso, {:>=, :"$1", from}, {:<, :"$1", to}}],
        [{{:"$1", :"$2"}}]}
     ])
-    Enum.map(medianize(pings, 10), fn {start_time, duration} ->
-      %{start_time: start_time, duration: duration}
-    end)
+    successful_pings = Enum.filter(pings, fn({_, end_time}) -> is_number(end_time) end)
+    failed_pings = Enum.filter(pings, fn({_, end_time}) -> end_time == :failed end)
+    %{
+      successful: Enum.map(medianize(successful_pings, 10), fn ({start_time, duration}) ->
+        %{x: start_time / 1000000, y: duration / 1000000000}
+      end),
+      failed: Enum.map(failed_pings, fn({start_time, _}) -> %{x: start_time / 1000000, y: 0} end)
+    }
   end
 
   def get_as_json_averaged(age, stride) do
@@ -115,7 +120,7 @@ defmodule PiMonitor.Storage do
   end
 
   defp medianize(list, stride) do
-    chunked = Enum.chunk_every(Enum.filter(list, fn({_, end_time}) -> is_number(end_time) end), stride)
+    chunked = Enum.chunk_every(Enum.filter(list, fn({_, end_time}) -> is_number(end_time) end), stride, stride, :discard)
     Enum.map(chunked, fn([{start_time, _}|_] = chunk) -> {start_time, Enum.at(Enum.sort(Enum.map(chunk, &calculate_duration/1)), div(stride, 2))} end)
   end
 

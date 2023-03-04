@@ -16,13 +16,22 @@
 
   var chart = new Chart(ctx, {
 
-    type: 'bar',
     data: {
-      labels: [],
       datasets: [{
+        type: 'bar',
         label: 'Ping in seconds',
+        parsing: false,
         data: [],
-        barThickness: 1
+        barThickness: 1,
+        order: 2
+      },
+      {
+        type: 'line',
+        label: 'Failed pings',
+        parsing: false,
+        data: [],
+        showLine: false,
+        order: 1
       }]
     },
     options: {
@@ -80,10 +89,8 @@
         let v = this;
         xhttp.onload = function() {
           let data = JSON.parse(this.responseText);
-          let labels = data.map(x => x.start_time / 1000000)
-          let times = data.map(x => x.duration / 1000000000)
-          chart.data.labels = labels;
-          chart.data.datasets[0].data = times;
+          chart.data.datasets[0].data = data.successful;
+          chart.data.datasets[1].data = data.failed;
           chart.update();
           v.canNavigate = true;
         }
@@ -96,10 +103,8 @@
       let v = this;
       xhttp.onload = function() {
         let data = JSON.parse(this.responseText);
-        let labels = data.map(x => x.start_time / 1000000)
-        let times = data.map(x => x.duration / 1000000000)
-        chart.data.labels = labels;
-        chart.data.datasets[0].data = times;
+        chart.data.datasets[0].data = data.successful;
+        chart.data.datasets[1].data = data.failed;
         chart.update();
         v.canNavigate = true;
       }
