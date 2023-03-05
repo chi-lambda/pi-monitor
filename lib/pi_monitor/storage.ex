@@ -79,7 +79,7 @@ defmodule PiMonitor.Storage do
   def get(age) do
     last = :mnesia.dirty_last(:ping_storage)
     :mnesia.dirty_select(:ping_storage, [
-      {{:ping_storage, :"$1", :"$2", :"$3"}, [{:>=, :"$1", last - age}], [{{:'$2',:'$3'}}]}
+      {{:ping_storage, :"$1", :"$2", :"$3"}, [{:>=, :"$1", last - age + 1}], [{{:'$2',:'$3'}}]}
     ])
   end
 
