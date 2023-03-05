@@ -25,7 +25,7 @@ defmodule PiMonitor.Telegram.Notifier do
       PiMonitor.Storage.get_grouped(3600)
 
     failure_rate = failed / max(received + failed, 1) * 100
-    message_text = "Received: #{received}, Failed: #{failed}, Failure rate: #{failure_rate}%"
+    message_text = :erlang.list_to_binary(:io_lib.format('Received: ~p, Failed: ~p, Failure rate: ~.3f%', [received, failed, failure_rate]))
     {:ok, _} = PiMonitor.Telegram.Api.send_message(message_text)
     {:noreply, state}
   end
@@ -76,7 +76,7 @@ defmodule PiMonitor.Telegram.Notifier do
     since = now - last_call
 
     if since > @max_gap or (failure_rate > @threshold and since > @min_gap) do
-      message_text = "Received: #{received}, Failed: #{failed}, Failure rate: #{failure_rate}%"
+      message_text = :erlang.list_to_binary(:io_lib.format('Received: ~p, Failed: ~p, Failure rate: ~.3f%', [received, failed, failure_rate]))
 
       case PiMonitor.Telegram.Api.send_message(message_text) do
         {:ok, _} -> {:noreply, {tref, now}}
