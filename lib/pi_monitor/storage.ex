@@ -90,11 +90,14 @@ defmodule PiMonitor.Storage do
     ])
     successful_pings = Enum.filter(pings, fn({_, end_time}) -> is_number(end_time) end)
     failed_pings = Enum.filter(pings, fn({_, end_time}) -> end_time == :failed end)
+    pending_pings = Enum.filter(pings, fn({_, end_time}) -> end_time == :pending end)
+    now = :erlang.system_time()
     %{
       successful: Enum.map(medianize(successful_pings, 10), fn ({start_time, duration}) ->
         %{x: start_time / 1000000, y: duration / 1000000000}
       end),
-      failed: Enum.map(failed_pings, fn({start_time, _}) -> %{x: start_time / 1000000, y: 0} end)
+      failed: Enum.map(failed_pings, fn({start_time, _}) -> %{x: start_time / 1000000, y: 0} end),
+      pending: Enum.map(pending_pings, fn({start_time, _}) -> %{x: start_time / 1000000, y: 0} end)
     }
   end
 

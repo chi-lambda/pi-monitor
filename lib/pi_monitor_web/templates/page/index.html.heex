@@ -23,7 +23,7 @@
         parsing: false,
         data: [],
         barThickness: 1,
-        order: 2
+        order: 3
       },
       {
         type: 'line',
@@ -32,6 +32,14 @@
         data: [],
         showLine: false,
         order: 1
+      },
+      {
+        type: 'line',
+        label: 'Pending pings',
+        parsing: false,
+        data: [],
+        showLine: false,
+        order: 2
       }]
     },
     options: {
@@ -105,6 +113,7 @@
         let data = JSON.parse(this.responseText);
         chart.data.datasets[0].data = data.successful;
         chart.data.datasets[1].data = data.failed;
+        chart.data.datasets[2].data = data.pending;
         chart.update();
         v.canNavigate = true;
       }
